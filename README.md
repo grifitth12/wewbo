@@ -1,5 +1,7 @@
 # Wewbo
-
+<center>
+<img src="https://raw.githubusercontent.com/upi-0/wewbo/refs/heads/main/assets/tuiPreview.png">
+</center>
 An interactive terminal application for searching and watching anime from various streaming sources.
 
 ## About
