@@ -31,41 +31,38 @@ proc askAnime(ex: BaseExtractor, title: string) : AnimeData {.raises: [AnimeNotF
     raise newException(AnimeNotFoundError, "No Anime Found")
   return listAnime.ask()
 
-proc askEpisode(ex: BaseExtractor, ad: AnimeData) : EpisodeData {.raises: [EpisodeNotFoundError, Exception].} =
+proc askEpisode(ex: BaseExtractor, ad: AnimeData) : tuple[index: int, episodes: seq[EpisodeData]] {.raises: [EpisodeNotFoundError, Exception].} =
   var
+    index: int
+    episode: EpisodeData
+  let
     animeUrl = ex.get(ad)
     listEpisode = ex.episodes(animeUrl)
 
   if listEpisode.len < 1 :
     raise newException(EpisodeNotFoundError, "No Episode Found")
-  return listEpisode.ask()
+
+  episode = listEpisode.ask()
+  index = listEpisode.find(episode)
+
+  return (index: index, episodes: listEpisode)
 
 
-proc main*() =
+proc main*(title: string, extractorName: string) =
   var
     anime: AnimeData
-    episodes: seq[EpisodeData]
-    episode: EpisodeData
-    start_idx: int
-    playerName: string
     extractor: BaseExtractor
-
-  let
-    title = optionsParser.nargs[0]
-    extractorName = optionsParser.get("name").getStr()
   
   try :
     extractor = getExtractor(extractorName)
     anime = askAnime(extractor, title)
 
   except AnimeNotFoundError :
-    echo "Linux Rijal KO Gada anjir"
+    echo "Failed to fetch anime from '$#' trying with 'pahe' instead" % [extractor.name]
     extractor = getExtractor("pahe")
     anime = askAnime(extractor, title)
 
-  episode = askEpisode(extractor, anime)
-  start_idx = episodes.find episode
-  playerName = optionsParser.get("player").getStr()
+  let (start_idx, episodes) = askEpisode(extractor, anime)
 
   main_controller_loop(
     extractor,
@@ -75,4 +72,11 @@ proc main*() =
   )  
 
 when isMainModule :
-  main()
+  try :
+    let
+      exName = optionsParser.get("name").getStr()
+      title = optionsParser.nargs[0]
+    main(title, exName)
+
+  except IndexDefect :
+    echo "No title provided. Try: `wewbo [Anime Title]`"      
