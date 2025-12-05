@@ -1,3 +1,5 @@
+import logger
+import illwill
 import std/[
   terminal,
   os,
@@ -58,7 +60,7 @@ proc main*(title: string, extractorName: string) =
     anime = askAnime(extractor, title)
 
   except AnimeNotFoundError :
-    echo "Failed to fetch anime from '$#' trying with 'pahe' instead" % [extractor.name]
+    log.info "Failed to fetch anime from '$#' trying with 'pahe' instead" % [extractor.name]
     extractor = getExtractor("pahe")
     anime = askAnime(extractor, title)
 
@@ -78,5 +80,21 @@ when isMainModule :
       title = optionsParser.nargs[0]
     main(title, exName)
 
+  try :
+    let
+      exName = optionsParser.get("name").getStr()
+      title = optionsParser.nargs[0]
+    main(title, exName)
+
   except IndexDefect :
-    echo "No title provided. Try: `wewbo [Anime Title]`"      
+    echo "Try: `wewbo [Anime Title]`"
+    showCursor()
+    quit(1)
+
+  except ref Exception:
+    log.info("ERROR: " & getCurrentExceptionMsg())
+    log.info("This Program will close automaticly in 3 Seconds")
+    sleep(3000)
+    eraseScreen()
+    showCursor()
+    quit(1) 
