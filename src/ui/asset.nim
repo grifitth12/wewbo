@@ -1,9 +1,9 @@
 import pkg/illwill
 import std/[terminal, strutils]
 
-proc renderBanner*(tb: var TerminalBuffer, termWidth: int) =
+proc renderBanner*(tb: var TerminalBuffer) =
   ## Render ASCII art banner
-  let x = (termWidth - 36) div 2
+  let x = (tb.width - 36) div 2
   
   tb.write(x, 0, fgWhite, styleBright, "                        _           ")
   tb.write(x, 1, fgWhite, styleBright, "                       | |          ")
@@ -12,8 +12,11 @@ proc renderBanner*(tb: var TerminalBuffer, termWidth: int) =
   tb.write(x, 4, fgWhite, styleBright, "  \\ V  V /  __/\\ V  V /| |_) | (_) |")
   tb.write(x, 5, fgWhite, styleBright, "   \\_/\\_/ \\___| \\_/\\_/ |_.__/ \\___/ ")
 
-proc renderTopBorder*(tb: var TerminalBuffer, termWidth: int, yPos: int, title: string = "Rijal Ke Sukabumi") =
+proc renderBanner*(tb: var TerminalBuffer, termWidth: int) {.deprecated.} = renderBanner(tb)  
+
+proc renderTopBorder*(tb: var TerminalBuffer, yPos: int, title: string = "Rijal Ke Sukabumi") =
   let
+    termWidth = tb.width
     pageInfo = " $# " % [title]
     leftPad = (termWidth - pageInfo.len - 2) div 2
     rightPad = termWidth - pageInfo.len - leftPad - 2

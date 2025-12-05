@@ -17,7 +17,7 @@ proc renderItems[T: Questionable](tb: var TerminalBuffer, data: openArray[T],
     let padding = termWidth - contentLen - 2
     
     if i == selected:
-      # Item terpilih dengan highlight
+      # Selected Line
       tb.write(0, row, fgCyan, "║", resetStyle)
       tb.setBackgroundColor(bgGreen)
       tb.setForegroundColor(fgBlack, bright=true)
@@ -25,12 +25,12 @@ proc renderItems[T: Questionable](tb: var TerminalBuffer, data: openArray[T],
       tb.resetAttributes()
       tb.write(termWidth - 1, row, fgCyan, "║")
     else:
-      # Item biasa
+      # Normal Line
       tb.write(0, row, fgCyan, "║", fgWhite, "  " & item.title & " ".repeat(padding), fgCyan, "║")
     
     inc row
 
-proc ask*[T: Questionable](data: seq[T], pageSize: int = 30, title: string = "Firaun makan nasi"): T =
+proc ask*[T: Questionable](data: seq[T], pageSize: int = terminalHeight() - 2, title: string = "Firaun makan nasi", init: bool = true, deInit: bool = true): T =
   if data.len == 0:
     raise newException(ValueError, "Data cannot be empty")
   
@@ -45,9 +45,10 @@ proc ask*[T: Questionable](data: seq[T], pageSize: int = 30, title: string = "Fi
     showCursor()
     quit(0)
   
-  illwillInit(fullscreen=false)
-  setControlCHook(cleanup)
-  hideCursor()
+  if init :
+    illwillInit(fullscreen=false)
+    setControlCHook(cleanup)
+    hideCursor()
   
   var tb = newTerminalBuffer(termWidth, terminalHeight())
   
@@ -73,7 +74,7 @@ proc ask*[T: Questionable](data: seq[T], pageSize: int = 30, title: string = "Fi
     let bottomBorderY = itemsPerPage + 1
     
     # Render komponen
-    renderTopBorder(tb, termWidth, topBorderY, title=title)
+    renderTopBorder(tb, topBorderY, title=title)
     renderItems(tb, data, termWidth, itemsStartY, selected, pageStart, pageEnd)
     renderEmptyRows(tb, termWidth, itemsStartY + (pageEnd - pageStart), itemsPerPage)
     renderBottomBorder(tb, termWidth, bottomBorderY)
@@ -106,9 +107,9 @@ proc ask*[T: Questionable](data: seq[T], pageSize: int = 30, title: string = "Fi
       selected = data.len - 1
       render()
     of Key.Enter, Key.Space:
-      illwillDeinit()
-      showCursor()
-      # eraseScreen()
+      if deInit :
+        illwillDeinit()
+        showCursor()
       return data[selected]
     of Key.Escape, Key.Q:
       illwillDeinit()
