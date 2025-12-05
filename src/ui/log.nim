@@ -23,8 +23,8 @@ proc show_log_until_complete*(process: Process, checkup: int = 500): int =
 
   proc renderFrame() =
     tb.clear()
-    tb.renderBanner(width)
-    tb.renderTopBorder(width, 7)
+    tb.renderBanner()
+    tb.renderTopBorder(7)
     
     # Render content area borders
     for i in 8..height - 2:
