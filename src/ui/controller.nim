@@ -5,6 +5,7 @@ import
   ../player/all
 
 from httpclient import close
+from illwill import illwillDeinit
 
 type
   ControllerAction = enum
@@ -55,6 +56,7 @@ proc main_controller_loop(
       of exit:
         close(extractor.connection.client)
         eraseScreen()
+        illwillDeinit()
         quit(0)
 
       of nextEpisode :

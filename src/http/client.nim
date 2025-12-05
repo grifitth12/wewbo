@@ -8,12 +8,17 @@ import std/[
 import ../media/types
 import ./cache
 
+from ../logger import log, info
+
 type
   HttpConnection = ref object of RootObj
     host*: string
     client*: HttpClient
     headers*: HttpHeaders
     cache*: HttpCache
+
+proc info(con: HttpConnection, text: string) =
+  log.info("[HTTP] " & text)
 
 proc newHttpConnection*(host: string, ua: string, headers: Option[JsonNode] = none(JsonNode)): HttpConnection =
   var
@@ -155,6 +160,7 @@ proc req*(
     try:
       return connection.client.reqq(url, mthod, payload, host)
     except ProtocolError:
+      connection.info("Renew Http Client")
       connection.reNewClient()
       return connection.client.reqq(url, mthod, payload, host)
 

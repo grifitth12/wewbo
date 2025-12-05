@@ -30,7 +30,7 @@ proc renderItems[T: Questionable](tb: var TerminalBuffer, data: openArray[T],
     
     inc row
 
-proc ask*[T: Questionable](data: seq[T], pageSize: int = terminalHeight() - 2, title: string = "Firaun makan nasi", init: bool = true, deInit: bool = true): T =
+proc ask*[T: Questionable](data: seq[T], pageSize: int = terminalHeight() - 2, title: string = "Firaun makan nasi", init: bool = false, deInit: bool = false): T =
   if data.len == 0:
     raise newException(ValueError, "Data cannot be empty")
   
