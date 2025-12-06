@@ -73,13 +73,7 @@ proc main*(title: string, extractorName: string) =
     start_idx
   )  
 
-when isMainModule :
-  try :
-    let
-      exName = optionsParser.get("name").getStr()
-      title = optionsParser.nargs[0]
-    main(title, exName)
-
+proc main*() =
   try :
     let
       exName = optionsParser.get("name").getStr()
@@ -88,7 +82,6 @@ when isMainModule :
 
   except IndexDefect :
     echo "Try: `wewbo [Anime Title]`"
-    showCursor()
     quit(1)
 
   except ref Exception:
@@ -98,3 +91,4 @@ when isMainModule :
     eraseScreen()
     showCursor()
     quit(1) 
+
