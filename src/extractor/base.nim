@@ -24,8 +24,6 @@ type
     lg*: WewboLogger
     initialized: bool = false
 
-method sInit*(extractor: BaseExtractor) : InfoExtractor {.base, deprecated.} = discard
-
 method animes*(ex: BaseExtractor, title: string) : seq[AnimeData] {.base.} = discard
 method get*(ex: BaseExtractor, data: AnimeData) : string {.base.} = data.url
 
@@ -69,8 +67,7 @@ export
   info
 
 export
-  BaseExtractor,
-  InfoExtractor
+  BaseExtractor
 
 export  
   AnimeData,

@@ -29,12 +29,14 @@ type
 
   OtakudesuEX* {.final.} = ref object of BaseExtractor
 
-method sInit*(ex: OtakudesuEX) : InfoExtractor = 
-  result.host = "otakudesu.best"
-  result.name = "taku"
-  result.http_headers = some(%*{
-    "Content-Type" : "application/x-www-form-urlencoded; charset=UTF-8"
-  })
+proc newOtakudesu*(ex: var BaseExtractor) =
+  ex = OtakudesuEX(
+    host: "otakudesu.best",
+    name: "taku",
+    http_headers: some(%*{
+      "Content-Type" : "application/x-www-form-urlencoded; charset=UTF-8"
+    })
+  )
 
 func source(headTitle: string) : OtakuSources =
   for source in OtakuSources :
