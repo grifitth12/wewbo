@@ -92,7 +92,3 @@ when isMainModule  :
 
   discard rijal.setUp()
   discard rijal.downloadAll([media], ["episode1.mp4"])
-  echo rijal.execute()
-
-  # discard curl.download()
-  # discard curl.execute()
