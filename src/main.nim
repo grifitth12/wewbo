@@ -26,7 +26,7 @@ proc setPlayer() : Player =
 
   getPlayer(playerName)    
 
-proc askAnime(ex: BaseExtractor, title: string) : AnimeData {.raises: [AnimeNotFoundError, Exception].} =
+proc askAnime*(ex: BaseExtractor, title: string) : AnimeData {.raises: [AnimeNotFoundError, Exception].} =
   var listAnime = ex.animes(title)
   if listAnime.len < 1 :
     raise newException(AnimeNotFoundError, "No Anime Found")

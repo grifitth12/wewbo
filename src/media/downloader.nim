@@ -13,20 +13,22 @@ import
   options,
   strutils,
   sequtils,
-  tables,
+  tables
+
+import  
   ../process,
   ../media/types
 
 type
   FfmpegDownloader = ref object of CliApplication
-    outdir*: string = "."
+    outdir*: string
+    targetExt: string = "mp4"
     crf: int = 28
     fps: int = 25
     itr: int = 0
 
-proc newFfmpegDownloader() : FfmpegDownloader =
-  result.name = "ffmpeg"
-  result.setUp()
+proc newFfmpegDownloader*(outdir: string) : FfmpegDownloader =
+  FfmpegDownloader(name: "ffmpeg", outdir: outdir).setUp()
 
 proc setHeader(ffmpeg: FfmpegDownloader, ty, val: string) =
   let ngantukCok = {
@@ -39,10 +41,12 @@ proc setHeader(ffmpeg: FfmpegDownloader, ty, val: string) =
   ffmpeg.addArg "$#: $#" % [ngantukCok[ty], val]
 
 proc setUpHeader(ffmpeg: FfmpegDownloader, headers: Option[MediaHttpHeader]) =
-  if headers.isSome :
-    for chi, no in headers.get.fieldPairs() :
-      if no != "" :
-        ffmpeg.setHeader(chi, no)
+  if headers.isNone :
+    return
+
+  for chi, no in headers.get.fieldPairs() :
+    if no != "" :
+      ffmpeg.setHeader(chi, no)
 
 proc setGatauIniApa(ffmpeg: FfmpegDownloader) =
   # Vcodec
@@ -62,33 +66,19 @@ proc setInput(ffmpeg: FfmpegDownloader, media: MediaFormatData) =
   ffmpeg.addArg media.video
 
 proc setOutput(ffmpeg: FfmpegDownloader, output: string) =
-  ffmpeg.addArg ffmpeg.outdir / output
+  if not dirExists(ffmpeg.outdir) :
+    createDir(ffmpeg.outdir)
+  ffmpeg.addArg "$#.$#" % [ffmpeg.outdir / output.replace(" ", "-"), ffmpeg.targetExt]
 
 proc download*(ffmpeg: FfmpegDownloader, input: MediaFormatData, output: string) : int =
   ffmpeg.setUpHeader(input.headers)
   ffmpeg.setInput(input)
   ffmpeg.setGatauIniApa()
   ffmpeg.setOutput(output)
-  ffmpeg.execute()
+  ffmpeg.execute("Downloading " & output)
 
 proc downloadAll*(ffmpeg: FfmpegDownloader, inputs: openArray[MediaFormatData], outputs: openArray[string]) : seq[int] =
   assert inputs.len == outputs.len
   for apate in zip(inputs, outputs) :
     result.add(
       ffmpeg.download(apate[0], apate[1]))
-
-when isMainModule  :
-  var
-    palla = MediaHttpHeader(
-      userAgent: "Mozilla",
-      referer: "https://animepahe.si/"
-    )
-    media = MediaFormatData(
-      video: "https://vault-09.uwucdn.top/stream/09/13/24c3b66ebb38310566676549c7df78b458633edd4b63a4f9bb26f704e4f319ca/uwu.m3u8",
-      typeExt: extM3u8,
-      headers: palla.some
-    )
-    rijal = newFfmpegDownloader()
-
-  discard rijal.setUp()
-  discard rijal.downloadAll([media], ["episode1.mp4"])
