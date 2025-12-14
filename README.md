@@ -51,7 +51,7 @@ wewbo [anime title]
 - `-n` or `--name`: Select anime source (default: `kura`)
 - `kura` - Kuramanime
 - `pahe` - Animepahe
-- `` - Hianime
+- `hime` - Hianime
 - `taku` - Otakudesu
 
 - `-p` or `--player`: Select media player (default: `mpv`)
