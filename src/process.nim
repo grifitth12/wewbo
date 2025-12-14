@@ -1,9 +1,12 @@
 import std/osproc
 import os
+import options
 
 from ui/log import show_log_until_complete
 
 type
+  AfterExecuteProc = proc() {.nimcall.}
+
   CliApplication = ref object of RootObj
     name*: string
     args*: seq[string]
@@ -34,11 +37,18 @@ proc setUp[T: CliApplication](app: T, path: string = app.name) : T =
 proc addArg(app: CliApplication, arg: string) =
   app.args.add arg
 
-proc execute(app: CliApplication, clearArgs: bool = true) : int =
+proc execute(
+  app: CliApplication,
+  message: string = "Executing external app.",
+  clearArgs: bool = true,
+  after: Option[AfterExecuteProc] = none(AfterExecuteProc)
+) : int =
   app.process = startProcess(app.path, ".", app.args)
   if clearArgs :
     app.args = @[]
-  app.process.show_log_until_complete()
+  result = app.process.show_log_until_complete(message)
+  if after.isSome :
+    get(after)()
 
 export
   CliApplication,
