@@ -1,5 +1,13 @@
+# Compiled
 *.exe
+*.tar.gz
+*.out
 
+# Lib
+libressl*
+pcre*
+
+# Internal
 nimcache
 testresults
 build

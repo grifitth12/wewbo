@@ -2,6 +2,8 @@ from math import round
 import streams
 import strutils
 import std/[macros]
+import illwill
+import terminal
 
 macro getField*(obj: object, fieldName: static string): untyped =
   nnkDotExpr.newTree(obj, ident(fieldName))
@@ -74,3 +76,12 @@ func getAttribute*(text: string, start: string, endo: string = ","): string =
 proc getAfter*(text: string, start: string): string =
   var stato = text.find(start) + start.len
   return text[stato .. text.len - 1]
+
+proc exit*(s: int = 0) {.noconv, deprecated.} =
+  try:
+    illwillDeinit()
+  except:
+    discard
+  finally:
+    showCursor() 
+    quit(0)

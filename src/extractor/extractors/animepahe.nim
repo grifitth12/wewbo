@@ -14,16 +14,18 @@ import ../../utils
 type 
   AnimepaheEX {.final.} = ref object of BaseExtractor
 
-method sInit*(ex: AnimepaheEX) : InfoExtractor =
-  result.name = "pahe"
-  result.host = "animepahe.si"
-  result.http_headers = some(%*{
-    "Cookie" : "__ddgid_=yF8PHfOsX4Hja1YA; __ddg2_=txfoen42BeK4Kp13; __ddg1_=rxGMTN3zVY213Uxo849v; res=1080; aud=jpn; av1=0; XSRF-TOKEN=eyJpdiI6InRyUHlDUVZZMGY0SGhHRFdodHoxNVE9PSIsInZhbHVlIjoiME5FZUtub1FKNmVhQ0FOZmtBNXpTUlVZalFJTjE0bm9XYlVxT3lCSStzUzYvbjhOZys5TmVZNXlXMCt6cmN5YVdaZ3VhVlVJRFBkQ28rRE9sTURxeE5YY1laellTQ1lYWnFHWmJVb3JEVDZ1ZHZVUS9sYitBb2dIVlFwN1laWGYiLCJtYWMiOiI3ZDNhYTdiM2Q1NTM4YTJjYjM1ZTM4OTVlODc5NzJjNzNhY2YzNGFkZTdjNzk2MjFlM2ZiYmE4NTA4YjgzNjRkIiwidGFnIjoiIn0%3D;",
-    "Referer" : "https://animepahe.si"
-  })
+proc newAnimepahe*(extractor: var BaseExtractor) =
+  extractor = AnimepaheEX(
+    name: "pahe",
+    host: "animepahe.si",
+    http_headers: some(%*{
+      "Cookie" : "__ddgid_=yF8PHfOsX4Hja1YA; __ddg2_=txfoen42BeK4Kp13; __ddg1_=rxGMTN3zVY213Uxo849v; res=1080; aud=jpn; av1=0; XSRF-TOKEN=eyJpdiI6InRyUHlDUVZZMGY0SGhHRFdodHoxNVE9PSIsInZhbHVlIjoiME5FZUtub1FKNmVhQ0FOZmtBNXpTUlVZalFJTjE0bm9XYlVxT3lCSStzUzYvbjhOZys5TmVZNXlXMCt6cmN5YVdaZ3VhVlVJRFBkQ28rRE9sTURxeE5YY1laellTQ1lYWnFHWmJVb3JEVDZ1ZHZVUS9sYitBb2dIVlFwN1laWGYiLCJtYWMiOiI3ZDNhYTdiM2Q1NTM4YTJjYjM1ZTM4OTVlODc5NzJjNzNhY2YzNGFkZTdjNzk2MjFlM2ZiYmE4NTA4YjgzNjRkIiwidGFnIjoiIn0%3D;",
+      "Referer" : "https://animepahe.si"
+    })
+  )
 
 method animes*(ex: AnimepaheEX, title: string) : seq[AnimeData] =
-  var res_json = ex.connection.req("/api?m=search&q=" & title).to_json()
+  let res_json = ex.connection.req("/api?m=search&q=" & title).to_json()
   if res_json.hasKey("data") :
     for anime in res_json["data"] :
       result.add AnimeData(
@@ -35,7 +37,7 @@ method animes*(ex: AnimepaheEX, title: string) : seq[AnimeData] =
   else : raise newException(AnimeNotFoundError, "Animepahe Gagal jir")      
 
 proc get_by_index(ex: AnimepaheEX, session: string, index: int = 1, sort: string = "asc") : tuple[all: JsonNode, total: int] =
-  var
+  let
     url_format = "/api?m=release&id=$#&sort=episode_$#&page=$#"
     real_url = url_format % [session, sort, $index]
     sukamto = ex.connection.req(real_url).to_json()
@@ -46,7 +48,7 @@ proc get_by_index(ex: AnimepaheEX, session: string, index: int = 1, sort: string
   )
 
 method episodes*(ex: AnimepaheEX, url: string) : seq[EpisodeData] =
-  var
+  let
     session = url.split("/")[^1]
     ells = ex.get_by_index(session, 1)
     episodes = ells.all
@@ -76,7 +78,7 @@ method get(ex: AnimepaheEX, data: EpisodeData): string =
   if data.url.len > 1 :
     return data.url
 
-  var
+  let
     session = data.addictional.get["session"].getStr()
     index = data.key.find_episode(
       data.addictional.get["total_eps"].getInt(), 30)
@@ -88,8 +90,9 @@ method get(ex: AnimepaheEX, data: EpisodeData): string =
   raise newException(ValueError, "Failed to fetch at animepahe")
 
 method formats*(ex: AnimepaheEX, url: string) : seq[ExFormatData] =
-  var
+  let
     buttons = ex.main_els(url, "button")
+  var
     src: string
 
   for button in buttons :
@@ -162,7 +165,7 @@ proc force_get_index(script: string, vault: string) : string =
       raise newException(ValueError, "Index not found")
 
 proc get_m3u8_id(script: string) : string =
-  var
+  let
     startt = script.find("m3u8|uwu|") + 9
     endd = startt + 63
 

@@ -10,23 +10,24 @@ import ui/[
   ask,
   controller,
 ]
-import ./options
-import ./extractor/[all, types]
-import ./player/all
+import
+  ./extractor/[all, types],
+  ./player/all,
+  ./terminal/paramarg
 
-proc setPlayer() : Player =
-  var
-    playerName = optionsParser.get("player").getStr()
+from utils import exit
 
+proc setPlayer(playerName: string) : Player =
+  var ple = playerName
   if players.len < 1 :
     raise newException(ValueError, "There are no Players available on your device")
   else :
-    if playerName == "" and players.contains("mpv") : playerName = "mpv"
-    else : playerName = "ffplay"
+    if ple == "" and players.contains("mpv") : ple = "mpv"
+    else : ple = "ffplay"
 
-  getPlayer(playerName)    
+  getPlayer(ple)    
 
-proc askAnime(ex: BaseExtractor, title: string) : AnimeData {.raises: [AnimeNotFoundError, Exception].} =
+proc askAnime*(ex: BaseExtractor, title: string) : AnimeData {.raises: [AnimeNotFoundError, Exception].} =
   var listAnime = ex.animes(title)
   if listAnime.len < 1 :
     raise newException(AnimeNotFoundError, "No Anime Found")
@@ -48,8 +49,7 @@ proc askEpisode(ex: BaseExtractor, ad: AnimeData) : tuple[index: int, episodes: 
 
   return (index: index, episodes: listEpisode)
 
-
-proc main*(title: string, extractorName: string) =
+proc stream*(title: string, extractorName: string, playerName: string) =
   var
     anime: AnimeData
     extractor: BaseExtractor
@@ -67,17 +67,18 @@ proc main*(title: string, extractorName: string) =
 
   main_controller_loop(
     extractor,
-    setPlayer(),
+    playerName.setPlayer(),
     episodes,
     start_idx
   )  
 
-proc main*() =
+proc stream*(f: FullArgument) =
   try :
     let
-      exName = optionsParser.get("name").getStr()
-      title = optionsParser.nargs[0]
-    main(title, exName)
+      exName = f["source"].getStr()
+      plName = f["player"].getStr()
+      title = f.nargs[0]
+    stream(title, exName, plName)
 
   except IndexDefect :
     echo "Try: `wewbo [Anime Title]`"
@@ -87,7 +88,5 @@ proc main*() =
     log.info("ERROR: " & getCurrentExceptionMsg())
     log.info("This Program will close automaticly in 3 Seconds")
     sleep(3000)
-    eraseScreen()
-    showCursor()
-    quit(1) 
 
+  exit(0)
