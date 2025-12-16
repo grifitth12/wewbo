@@ -4,9 +4,22 @@ import
   version,
   terminal/[command, paramarg]
 
+import
+  player/all
+
 from utils import exit
 
 const sourceHelp = "Select Source [kura|pahe|hime|taku]"
+
+proc listAvailablePlayers*(n: FullArgument) =
+  if players.len > 1 :
+    for pler in players :
+      echo "- " & pler
+
+  else :
+    echo "There are no players in your device."      
+
+  quit(0)    
 
 let app = [
   newSubCommand(
@@ -23,7 +36,10 @@ let app = [
       option("-crf", "crf", tInt, 28, "Set Video CRF (For compression)"),
       option("--no-sub", "nsub", tBool, false, "Dont include subtitle (Soft-sub only)")
     ]
-  )
+  ),
+  newSubCommand(
+    "--list-available-players", listAvailablePlayers, @[]
+  ),
 ]
 
 echo "wewbo " & ver
